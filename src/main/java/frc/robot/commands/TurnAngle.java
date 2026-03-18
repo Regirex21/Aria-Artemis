@@ -3,38 +3,39 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.CANDriveSubsystem;
 
-public class AutoDrive extends Command {
+public class TurnAngle extends Command {
 
   private final CANDriveSubsystem drive;
-  private final double xSpeed;
-  private final double zRotation;
+  private final double targetAngle;
 
-  public AutoDrive(CANDriveSubsystem drive, double xSpeed, double zRotation) {
+  public TurnAngle(CANDriveSubsystem drive, double angle) {
     this.drive = drive;
-    this.xSpeed = xSpeed;
-    this.zRotation = zRotation;
+    this.targetAngle = angle;
     addRequirements(drive);
   }
 
   @Override
   public void initialize() {
-    drive.resetGyro();
-    drive.lockHeading();
+    drive.resetGyro(); // importante
   }
 
   @Override
   public void execute() {
-    drive.driveArcade(xSpeed, zRotation);
+    double error = targetAngle - drive.getHeading();
+
+    double kP = 0.01; // ajustable
+    double turn = kP * error;
+
+    drive.driveArcade(0, turn);
   }
 
   @Override
   public void end(boolean interrupted) {
-    drive.unlockHeading();
     drive.driveArcade(0, 0);
   }
 
   @Override
   public boolean isFinished() {
-    return false;
+    return Math.abs(targetAngle - drive.getHeading()) < 2;
   }
 }

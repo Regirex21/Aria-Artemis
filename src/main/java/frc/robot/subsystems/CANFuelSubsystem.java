@@ -48,7 +48,7 @@ public class CANFuelSubsystem extends SubsystemBase {
     launcherConfig.inverted(false);
     launcherConfig.smartCurrentLimit(LAUNCHER_MOTOR_CURRENT_LIMIT);
 
-    launcherConfig.closedLoop.pid(0.0003, 0, 0);
+    launcherConfig.closedLoop.pid(0.00007, 0, 0.002);
     launcherConfig.closedLoop.velocityFF(0.0002);
 
     intakeLauncherRoller.configure(
@@ -76,6 +76,11 @@ public class CANFuelSubsystem extends SubsystemBase {
   public void setFeederRoller(double voltage) {
     feederRoller.setVoltage(voltage);
   }
+  
+  public void runIntake() {
+  intakeLauncherRoller.setVoltage(INTAKING_INTAKE_VOLTAGE);
+  feederRoller.setVoltage(INTAKING_FEEDER_VOLTAGE);
+}
 
   public void stop() {
     feederRoller.set(0);
