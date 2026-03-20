@@ -48,7 +48,7 @@ public class CANFuelSubsystem extends SubsystemBase {
     launcherConfig.inverted(false);
     launcherConfig.smartCurrentLimit(LAUNCHER_MOTOR_CURRENT_LIMIT);
 
-    launcherConfig.closedLoop.pid(0.00007, 0, 0.002);
+    launcherConfig.closedLoop.pid(0.0003, 0, 0.015);
     launcherConfig.closedLoop.velocityFF(0.0002);
 
     intakeLauncherRoller.configure(

@@ -5,29 +5,35 @@ import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.subsystems.AprilTagSubsystem;
+
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.UsbCamera;
+
 
 public class Robot extends TimedRobot {
 
   private Command m_autonomousCommand;
   private RobotContainer m_robotContainer;
+  private AprilTagSubsystem vision;
 
   @Override
   public void robotInit() {
 
     m_robotContainer = new RobotContainer();
+    vision = new AprilTagSubsystem();
 
     HAL.report(tResourceType.kResourceType_Framework, 10);
 
     UsbCamera camera = CameraServer.startAutomaticCapture();
-    camera.setResolution(320, 240);
+    camera.setResolution(420, 340);
     camera.setFPS(30);
   }
 
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
+    vision.process();
   }
 
   @Override

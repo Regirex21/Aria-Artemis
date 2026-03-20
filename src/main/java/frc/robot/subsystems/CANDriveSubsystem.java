@@ -29,9 +29,10 @@ public class CANDriveSubsystem extends SubsystemBase {
   //Heading control
   private double targetHeading = 0;
   private boolean headingLocked = false;
-  private final double kPHeading = 0.03;
+  private final double kPHeading = 0.02;
+  private boolean snapMode = false;
 
-  // 🚗 Drive
+  //Drive
   private final DifferentialDrive drive;
 
   @SuppressWarnings("removal")
@@ -91,35 +92,55 @@ public class CANDriveSubsystem extends SubsystemBase {
   public void lockHeading() {
     targetHeading = navx.getYaw();
     headingLocked = true;
-  }
+    snapMode = false;
+}
 
   public void unlockHeading() {
     headingLocked = false;
   }
 
-  private double getHeadingCorrection() {
-    double error = targetHeading - navx.getYaw();
-    return error * kPHeading;
-  }
+private double getHeadingCorrection() {
 
+    if (Math.abs(navx.getPitch()) > 10 || Math.abs(navx.getRoll()) > 10) {
+        return 0;
+    }
+
+    double error = targetHeading - navx.getYaw();
+
+    // NORMALIZAR (-180 a 180)
+    error = Math.IEEEremainder(error, 360);
+
+    double correction = error * kPHeading;
+
+    // limitar
+    correction = Math.max(Math.min(correction, 0.3), -0.3);
+
+    return correction;
+}
+
+public void setTargetHeading(double angle) {
+    targetHeading = angle;
+    headingLocked = true;
+    snapMode = true;
+}
   // =============================
   //DRIVE
   // =============================
 
   public void driveArcade(double xSpeed, double zRotation) {
 
-    // Si el driver gira manualmente → desactiva lock
-    if (Math.abs(zRotation) > 0.05) {
-      headingLocked = false;
+    // cancelar solo si es snap mode
+    if (snapMode && Math.abs(zRotation) > 0.1) {
+        headingLocked = false;
+        snapMode = false;
     }
 
-    // Corrección automática con NavX
-    if (headingLocked && Math.abs(zRotation) < 0.05) {
-      zRotation = getHeadingCorrection();
+    if (headingLocked) {
+        zRotation = getHeadingCorrection();
     }
 
     drive.arcadeDrive(xSpeed, zRotation);
-  }
+}
 
   public void stop() {
     drive.arcadeDrive(0, 0);
